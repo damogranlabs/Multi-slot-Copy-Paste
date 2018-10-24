@@ -128,10 +128,9 @@ printSelectedSlot(data)
     ClipBoard := data ; set clipboard
     ClipWait 1  ; wait for clipboard to contain data
     Send ^v    ; copy clipboard
+    Sleep 100
 
     ClipBoard := currentClipboardData ; restore original Clipboard content
     ClipWait 1  ; wait for clipboard to contain data
     currentClipboardData = ; save the memory if the clipboard was very large
-
-    Sleep 500 ; 500ms delay of sleep - avoid problems with clipboard copy/paste
 }
