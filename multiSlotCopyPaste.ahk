@@ -3,134 +3,175 @@
 ; How-to:
 ; To store something in a specific slot, press: LEFT Control + LEFT WINDOWS + Numpad 1-9
 ; To recall something from a specific slot, press: LEFT Control  + LEFT ALT + Numpad 1-9
-; To printout all slots in a special notification message box, press: LEFT Control + LEFT ALT + Numpad 0 
+; To restore last clipboard data, press: LEFT Control  + LEFT ALT + Backspace
+; To show all slots in a special GUI window, press: LEFT Control + LEFT ALT + Numpad 0 
 ;
-; You can still use usual Ctrl + c / Ctrl + v as you used to.
+; You can still use usual Ctrl + c / Ctrl + v as you used to (for, text, files, images, ...).
+; Other slots are intended for text only.
 ;
 ; Source: https://damogranlabs.com
-; Date: 25.10.2018
-; Version: 1.1
+; Date: 16.11.2018
+; Version: 1.2
 
 #SingleInstance Force
+#include displayGui.ahk
+
+slotData := Object()
 
 ; COPY keys
 <^<#Numpad1::
-    slot1 := getSelectedText()
+    getSelectedText(1)
     return
 
 <^<#Numpad2::
-    slot2 := getSelectedText()
+    getSelectedText(2)
     return
 
 <^<#Numpad3::
-    slot3 := getSelectedText()
+    getSelectedText(3)
     return
 
 <^<#Numpad4::
-    slot4 := getSelectedText()
+    getSelectedText(4)
     return
 
 <^<#Numpad5::
-    slot5 := getSelectedText()
+    getSelectedText(5)
     return
 
 <^<#Numpad6::
-    slot6 := getSelectedText()
+    getSelectedText(6)
     return
 
 <^<#Numpad7::
-    slot7 := getSelectedText()
+    getSelectedText(7)
     return
 
 <^<#Numpad8::
-    slot8 := getSelectedText()
+    getSelectedText(8)
     return
 
 <^<#Numpad9::
-    slot9 := getSelectedText()
+    getSelectedText(9)
     return
 
 ; PASTE
 <^<!Numpad1::
-    printSelectedSlot(slot1)
+    pasteSelectedSlot(1)
     return
 
 <^<!Numpad2::
-    printSelectedSlot(slot2)
+    pasteSelectedSlot(2)
     return
 
 <^<!Numpad3::
-    printSelectedSlot(slot3)
+    pasteSelectedSlot(3)
     return
 
 <^<!Numpad4::
-    printSelectedSlot(slot4)
+    pasteSelectedSlot(4)
     return
 
 <^<!Numpad5::
-    printSelectedSlot(slot5)
+    pasteSelectedSlot(5)
     return
 
 <^<!Numpad6::
-    printSelectedSlot(slot6)
+    pasteSelectedSlot(6)
     return
 
 <^<!Numpad7::
-    printSelectedSlot(slot7)
+    pasteSelectedSlot(7)
     return
 
 <^<!Numpad8::
-    printSelectedSlot(slot8)
+    pasteSelectedSlot(8)
     return
 
 <^<!Numpad9::
-    printSelectedSlot(slot9)
+    pasteSelectedSlot(9)
     return
 
-; Show slots data in popup message window
-<^<!Numpad0::
-    s1 := % "--------------------------- Slot 1: ---------------------------`n" . slot1 
-    s2 := % "`n`n--------------------------- Slot 2: ---------------------------`n" . slot2
-    s3 := % "`n`n--------------------------- Slot 3: ---------------------------`n" . slot3
-    s4 := % "`n`n--------------------------- Slot 4: ---------------------------`n" . slot4
-    s5 := % "`n`n--------------------------- Slot 5: ---------------------------`n" . slot5 
-    s6 := % "`n`n--------------------------- Slot 6: ---------------------------`n" . slot6 
-    s7 := % "`n`n--------------------------- Slot 7: ---------------------------`n" . slot7 
-    s8 := % "`n`n--------------------------- Slot 8: ---------------------------`n" . slot8
-    s9 := % "`n`n--------------------------- Slot 9: ---------------------------`n" . slot9
-    slots := s1 . s2 . s3 . s4 . s5 . s6 . s7 . s8 . s9
-    
-    MsgBox %slots%
+; Store/restore clipboard content
+$^c:: ; store clipboard before new clipboard is saved
+    storeClipboard()
     return
 
-; ------------------------------------------------------------------------------------------------------
-; store current clipboard data, copy currently selected text, restore clipboard data
-getSelectedText()
-{
+<^<!BackSpace:: ; write old cached clipboard data to current clipboard
+    restoreClipboard()
+    return
+
+<^<!Numpad0:: ; Show slots data in popup message window
+    printAllSlotsData()
+    return
+
+
+
+; --------------------------------------------------------------------------------------------------------
+; Functions
+; --------------------------------------------------------------------------------------------------------
+getSelectedText(slotIndex)
+{   ; store current clipboard data, copy currently selected text, restore clipboard data
+    global slotData
+
     currentClipboardData := ClipboardAll ; save clipboard contents
     
-    ClipBoard := ; clear clipboard
+    Clipboard := ; clear clipboard
     Send ^c    ; copy clipboard
     ClipWait 1  ; wait for clipboard to contain data
-    selectedText := Clipboard ; get currently selected text
+    slotData[slotIndex] := Clipboard ; get currently selected text
     
-    ClipBoard := currentClipboardData ; restore original Clipboard contents
+    Clipboard := currentClipboardData ; restore original Clipboard contents
     currentClipboardData := ; save the memory if the clipboard was very large
-
-    return selectedText
 }
 
-; fast-print slot data: copy currently clipboard data, set clipboard data with slot data, paste, restore original clipboard data
-printSelectedSlot(data)
-{
+pasteSelectedSlot(slotIndex)
+{   ; fast-print slot data: copy currently clipboard data, set clipboard data with slot data, paste, restore original clipboard data
+    global slotData
+
     currentClipboardData := ClipboardAll ; save clipboard content
 
-    ClipBoard := data ; set clipboard
-    ClipWait 1  ; wait for clipboard to contain data
-    Send ^v    ; copy clipboard
+    Clipboard := slotData[slotIndex] ; set clipboard
+    Send ^v    ; paste clipboard
     Sleep 100
 
-    ClipBoard := currentClipboardData ; restore original Clipboard content
-    ClipWait 1  ; wait for clipboard to contain data
+    Clipboard := currentClipboardData ; restore original Clipboard content
     currentClipboardData = ; save the memory if the clipboard was very large
+}
+
+storeClipboard()
+{   ; store clipboard data and issue 'copy' command
+    global slotData
+
+    slotData[10] := Clipboard
+
+    Send ^c    ; copy clipboard
+    ClipWait 1  ; wait for clipboard to contain data
+}
+
+restoreClipboard()
+{   ; write cached clipboard data back to clipboard
+    global slotData
+
+    Clipboard := slotData[10]
+    ClipWait 1
+}
+
+printAllSlotsData()
+{   ; display all data in ScrollBox Gui
+    global slotData
+
+    lastClipboard := % " Last clipboard: -----------------------------------------`n" . slotData[10]
+    s1 := % "`n`n Slot 1: ------------------------------------------------------`n" . slotData[1] 
+    s2 := % "`n`n Slot 2: ------------------------------------------------------`n" . slotData[2]
+    s3 := % "`n`n Slot 3: ------------------------------------------------------`n" . slotData[3]
+    s4 := % "`n`n Slot 4: ------------------------------------------------------`n" . slotData[4]
+    s5 := % "`n`n Slot 5: ------------------------------------------------------`n" . slotData[5]
+    s6 := % "`n`n Slot 6: ------------------------------------------------------`n" . slotData[6]
+    s7 := % "`n`n Slot 7: ------------------------------------------------------`n" . slotData[7]
+    s8 := % "`n`n Slot 8: ------------------------------------------------------`n" . slotData[8]
+    s9 := % "`n`n Slot 9: ------------------------------------------------------`n" . slotData[9]
+    slots := lastClipboard . s1 . s2 . s3 . s4 . s5 . s6 . s7 . s8 . s9
+
+    ScrollBox(slots, "P f{s10} h600 w500", "multiSlotCopyPaste Data")
 }
