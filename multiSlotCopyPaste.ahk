@@ -157,21 +157,58 @@ restoreClipboard()
     ClipWait 1
 }
 
+beautifySlotName(slotName, addLeadingNewLines:=True)
+{   ; common function to add dashes and center text - used to separate slot name and slot data
+    totalLengthOfSlotName := 100
+    _numberOfSpaces := 2
+    lenOfSlotName := StrLen(slotName)
+
+    numberOfDashes := (totalLengthOfSlotName - lenOfSlotName - _numberOfSpaces)/2
+    loop % numberOfDashes
+        dashesString .= "-"
+    
+    newSlotName := dashesString . " " . slotName . " " . dashesString . "`n" ; spaces number must match with _numberOfSpaces
+    if (addLeadingNewLines){
+        newSlotName := "`n`n" . newSlotName
+    }
+    return newSlotName
+}
+
 printAllSlotsData()
-{   ; display all data in ScrollBox Gui
+{   ; display non-empty slots data in ScrollBox Gui
     global slotData
 
-    lastClipboard := % " Last clipboard: -----------------------------------------`n" . slotData[10]
-    s1 := % "`n`n Slot 1: ------------------------------------------------------`n" . slotData[1] 
-    s2 := % "`n`n Slot 2: ------------------------------------------------------`n" . slotData[2]
-    s3 := % "`n`n Slot 3: ------------------------------------------------------`n" . slotData[3]
-    s4 := % "`n`n Slot 4: ------------------------------------------------------`n" . slotData[4]
-    s5 := % "`n`n Slot 5: ------------------------------------------------------`n" . slotData[5]
-    s6 := % "`n`n Slot 6: ------------------------------------------------------`n" . slotData[6]
-    s7 := % "`n`n Slot 7: ------------------------------------------------------`n" . slotData[7]
-    s8 := % "`n`n Slot 8: ------------------------------------------------------`n" . slotData[8]
-    s9 := % "`n`n Slot 9: ------------------------------------------------------`n" . slotData[9]
-    slots := lastClipboard . s1 . s2 . s3 . s4 . s5 . s6 . s7 . s8 . s9
+    lastClipboard := beautifySlotName("Last clipboard", False) . slotData[10]
+    printData := lastClipboard
+    
+    ; print out only slots that are not empty
+    if (slotData[1]) {
+        printData .= beautifySlotName("Slot 1") . slotData[1]
+    }
+    if (slotData[2]) {
+        printData .= beautifySlotName("Slot 2") . slotData[2]
+    }
+    if (slotData[3]) {    
+        printData .= beautifySlotName("Slot 3") . slotData[3]
+    }
+    if (slotData[4]) {
+        printData .= beautifySlotName("Slot 4") . slotData[4]
+    }
+    if (slotData[5]) {
+        printData .= beautifySlotName("Slot 5") . slotData[5]
+    }
+    if (slotData[6]) {
+        printData .= beautifySlotName("Slot 6") . slotData[6]
+    }
+    if (slotData[7]) {
+        printData .= beautifySlotName("Slot 7") . slotData[7]
+    }
+    if (slotData[8]) {
+        printData .= beautifySlotName("Slot 8") . slotData[8]
+    }
+    if (slotData[9]) {
+        printData .= beautifySlotName("Slot 9") . slotData[9]
+    }
 
-    ScrollBox(slots, "P f{s10} h600 w500", "multiSlotCopyPaste Data")
+    ScrollBox(printData, "s f{s10} h600 w500", "Multi-Slot Copy Paste: non-empty slots")
 }
