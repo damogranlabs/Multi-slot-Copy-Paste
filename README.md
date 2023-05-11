@@ -1,3 +1,6 @@
+# UPDATE 2022 
+Windows now has multi-slot clipboard built-in. It is great.
+
 # Multi-slot Copy Paste
 Source: [Damogran Labs: https://damogranlabs.com/](https://damogranlabs.com/2018/10/multi-slot-copy-paste/)  
 Date: 16.11.2018  
